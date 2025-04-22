@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Exercise 1</title>
-    </head>
-    <body>
-        <h1>Exercise 1</h1>
-    </body>
+<head>
+    <title>Exercise 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="btn">Home</a>
+        <a href="{{ url_for('exercise1') }}" class="btn">Exercise 1</a>
+    </nav>
+
+    <div class="container">
+        <div class="section" style="margin-top: 40px;">
+            <h1>Exercise 1</h1>
+            <p>Here you will visualize the top clients with most reported incidences and the types of incidences that required more resolution time.</p>
+        </div>
+    </div>
+
+</body>
 </html>

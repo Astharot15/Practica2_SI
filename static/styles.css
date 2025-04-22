@@ -1,0 +1,93 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos */
+h1, h2, h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Título principal de portada */
+.welcome-title {
+    font-size: 3.0rem;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 10px;
+}
+
+/* Subtítulo de portada */
+.welcome-subtitle {
+    font-size: 1.7rem;
+    color: #555;
+}
+
+/* Barra dw navegación */
+.navbar {
+    background-color: #a3dcef;
+    padding: 15px 30px;
+    border: 2px solid black;
+    display: flex;
+    gap: 10px;
+}
+
+.centered-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+}
+
+button, .btn {
+    padding: 10px 15px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover, .btn:hover {
+    background-color: #2980b9;
+}
+
+/* Icono */
+.dashboard-icon {
+    width: 320px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+}
+
+
