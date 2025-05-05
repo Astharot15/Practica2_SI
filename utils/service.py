@@ -3,10 +3,10 @@ import json
 from datetime import datetime
 
 
-def top_clientes(X):
+def top_clientes(X, JSON_FILE):
     
     #Cargamos archivo json
-    with open('data/data_clasified.json', 'r') as f:
+    with open(JSON_FILE, 'r') as f:
             data = json.load(f)
     # Crear DataFrame
     df = pd.DataFrame(data['tickets_emitidos'])
@@ -18,8 +18,8 @@ def top_clientes(X):
 
 
 
-def obtener_top_tipos_incidencias(X):
-    with open('data/data_clasified.json', 'r') as f:
+def obtener_top_tipos_incidencias(X, JSON_FILE):
+    with open(JSON_FILE, 'r') as f:
         data = json.load(f)
     df = pd.DataFrame(data['tickets_emitidos'])
 
@@ -32,8 +32,10 @@ def obtener_top_tipos_incidencias(X):
     top_tipos = df.groupby('tipo_incidencia')['tiempo_resolucion'].sum().head(X).reset_index()
     return top_tipos.to_dict('records')
 
-def obtener_top_empleados(X):
-    with open('data/data_clasified.json', 'r') as f:
+
+
+def obtener_top_empleados(X, JSON_FILE):
+    with open(JSON_FILE, 'r') as f:
         data = json.load(f)
     df = pd.DataFrame(data['tickets_emitidos'])
     
@@ -43,6 +45,9 @@ def obtener_top_empleados(X):
     # Sumar tiempo por empleado
     top_empleados = empleados.groupby('id_emp')['tiempo'].sum().head(X).reset_index()
     return top_empleados.to_dict('records')
+
+
+
 
 
 #print(top_clientes(10))
