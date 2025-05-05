@@ -1,6 +1,7 @@
 import pandas as pd
 import json
-from datetime import datetime
+import requests
+
 
 
 def top_clientes(X, JSON_FILE):
@@ -48,6 +49,25 @@ def obtener_top_empleados(X, JSON_FILE):
 
 
 
+def get_lasts_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
+
+    response = requests.get(url)
+    # Verificamos que la petición se realizó correctamente
+    if response.status_code == 200:
+        last30CVE = response.json()
+    else:
+        print(f"Error, Status Code: {response.status_code}")
+
+    nLastCVE = []
+
+
+    for item in last30CVE:
+        if 'cveMetadata' in item:
+            nLastCVE.append(item['cveMetadata']['cveId'])
+        if len(nLastCVE) == 10:
+            break
+
+    return nLastCVE
 
 
 #print(top_clientes(10))
