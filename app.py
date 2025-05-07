@@ -1,11 +1,7 @@
-from flask import Flask
 from flask import Flask, render_template
 import os
 
-template_dir = os.path.abspath('../templates')
-static_dir = os.path.abspath('../static')
-
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app = Flask(__name__)
 
 @app.route('/')
 def index():
