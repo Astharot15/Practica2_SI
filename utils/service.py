@@ -41,7 +41,7 @@ def obtener_top_empleados(X, JSON_FILE):
     top_empleados = empleados.groupby('id_emp')['tiempo'].sum().head(X).reset_index()
     return top_empleados.to_dict('records')
 
-def get_lasts_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
+def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
 
     response = requests.get(url)
     # Verificamos que la petición se realizó correctamente
