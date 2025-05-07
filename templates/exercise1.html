@@ -14,7 +14,62 @@
     <div class="container">
         <div class="section" style="margin-top: 40px;">
             <h1>Exercise 1</h1>
-            <p>Here you will visualize the top clients with most reported incidences and the types of incidences that required more resolution time.</p>
+            <p>
+              Visualize the top clients with most reported incidences,
+              the types of incidences that required more resolution time,
+              and the employees who spent the most time resolving incidents.
+            </p>
+            
+            <form method="POST">
+                <label for="top_x">Enter the value of X:</label>
+                <input type="number" id="top_x" name="top_x" min="1" required>
+
+                <label for="show_employees">
+                    <input
+                      type="checkbox"
+                      id="show_employees"
+                      name="show_employees"
+                      {% if show_employees|default(false) %}checked{% endif %}>
+                    Show top employees
+                </label>
+
+                <button type="submit" class="btn">Submit</button>
+            </form>
+
+            {% if top_clients %}
+            <h2>Top Clients</h2>
+            <div class="chart">
+                {% for client in top_clients %}
+                <div class="bar" style="width: {{ client.incidencias * 10 }}px;">
+                    {{ client['cliente'] }} ({{ client['incidencias'] }})
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if top_types %}
+            <h2>Top Incident Types</h2>
+            <div class="chart">
+                {% for incident in top_types %}
+                <div class="bar"
+                     style="width: {{ incident['tiempo_resolucion'] * 10 }}px;">
+                    {{ incident['tipo_incidencia'] }} ({{ incident['tiempo_resolucion'] }} days)
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if show_employees|default(false) and top_employees %}
+            <h2>Top Employees</h2>
+            <div class="chart">
+                {% for emp in top_employees %}
+                <div class="bar"
+                     style="width: {{ emp['tiempo'] * 10 }}px;">
+                    Employee {{ emp['id_emp'] }} ({{ emp['tiempo'] }} hours)
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
 
