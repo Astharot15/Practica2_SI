@@ -4,7 +4,6 @@ from collections import defaultdict
 import requests
 import datetime
 
-from samba.dcerpc.dcerpc import response
 
 
 def top_clientes(X, JSON_FILE):
