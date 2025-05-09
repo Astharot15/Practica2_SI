@@ -20,29 +20,106 @@
   <div class="container-full extra-metrics-text">
     <div class="section" style="margin-top:40px;">
       <h1>More Metrics</h1>
-      <p>Here you can found two extra metrics. The average time of resolution for each incident and the number of tickets per day of the week.</p>
+      <p>
+        Here you can find two extra metrics: the average time of resolution for each incident
+        and the number of tickets per day of the week.
+      </p>
 
       <form method="POST">
         <button type="submit" class="btn">Generate Metrics</button>
       </form>
 
       {% if resultados %}
-        <h2>Average time of resolution by incident type</h2>
-        <ul>
-          {% for tipo, valor in resultados.avg_by_type.items() %}
-            <li>{{ tipo }}: {{ valor }} días</li>
-          {% endfor %}
-        </ul>
+        <div class="info-lists">
+          <h2>Average time of resolution by incident type</h2>
+          <ul>
+            {% for tipo, valor in resultados.avg_by_type.items() %}
+              <li>{{ tipo }}: {{ valor }} días</li>
+            {% endfor %}
+          </ul>
 
-        <h2>Tickets per day of the week</h2>
-        <ul>
-          {% for dia, conteo in resultados.tickets_by_day.items() %}
-            <li>{{ dia }}: {{ conteo }}</li>
-          {% endfor %}
-        </ul>
+          <h2>Tickets per day of the week</h2>
+          <ul>
+            {% for dia, conteo in resultados.tickets_by_day.items() %}
+              <li>{{ dia }}: {{ conteo }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="charts-container">
+          <div class="chart-item">
+            <canvas id="chartAvgByType"></canvas>
+          </div>
+          <div class="chart-item">
+            <canvas id="chartTicketsByDay"></canvas>
+          </div>
+        </div>
       {% endif %}
     </div>
   </div>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  {% if resultados %}
+  <script>
+    // Convertimos a JS los resultados de Flask
+    const avgLabels = {{ resultados.avg_by_type.keys()|list|tojson }};
+    const avgData   = {{ resultados.avg_by_type.values()|list|tojson }};
+
+    const dayLabels = {{ resultados.tickets_by_day.keys()|list|tojson }};
+    const dayData   = {{ resultados.tickets_by_day.values()|list|tojson }};
+
+    // 1) Gráfico tiempo medio de resolución
+    new Chart(
+      document.getElementById('chartAvgByType'), {
+        type: 'bar',
+        data: {
+          labels: avgLabels,
+          datasets: [{
+            label: 'Resolution Days',
+            data: avgData,
+            backgroundColor: 'rgba(52, 152, 219, 0.5)',
+            borderColor:   'rgba(52, 152, 219, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Days' } },
+            x: { title: { display: true, text: 'Type of incident' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+    });
+
+    // 2) Gráfico tickets por día
+    new Chart(
+      document.getElementById('chartTicketsByDay'), {
+        type: 'bar',
+        data: {
+          labels: dayLabels,
+          datasets: [{
+            label: 'Tickets',
+            data: dayData,
+            backgroundColor: 'rgba(46, 204, 113, 0.5)',
+            borderColor:   'rgba(46, 204, 113, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Number of tickets' } },
+            x: { title: { display: true, text: 'Day of the Week' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+    });
+  </script>
+  {% endif %}
+
 </body>
 </html>
+

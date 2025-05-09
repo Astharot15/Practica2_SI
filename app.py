@@ -81,7 +81,6 @@ def exercise1():
 
 @app.route('/extra-metrics', methods=['GET', 'POST'])
 def extra_metrics():
-    # Protegemos con login
     if 'usuario' not in session:
         return redirect(url_for('login'))
 
@@ -89,7 +88,7 @@ def extra_metrics():
     if request.method == 'POST':
         json_file = os.path.join('data', 'data_clasified.json')
 
-        # Llamamos a la lógica en service.py
+        # lógica en service.py
         avg_by_type    = average_resolution_time_by_type(json_file)
         tickets_by_day = tickets_per_weekday(json_file)
 

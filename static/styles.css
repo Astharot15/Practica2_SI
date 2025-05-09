@@ -265,3 +265,24 @@ body.login-page {
   --text-light: #ecf0f1;
 }
 
+/* Contenedor y tamaño de los gráficas con chart */
+.charts-container {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.chart-item {
+  flex: 1;
+  max-width: 45%;
+}
+
+.chart-item canvas {
+  width: 100% !important;
+  height: 360px !important;
+}
+
+
+
+
