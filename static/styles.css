@@ -147,6 +147,21 @@ body.login-page {
   margin-bottom: 15px;
 }
 
+/* Cerrre de sesión */
+.navbar {
+  display: flex;
+  align-items: center;
+}
+
+.navbar .logout-btn {
+  margin-left: auto;
+  background-color: #95a5a6;
+}
+
+.navbar .logout-btn:hover {
+  background-color: #7f8c8d;
+}
+
 
 
 
