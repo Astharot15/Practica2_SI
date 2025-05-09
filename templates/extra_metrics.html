@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>More Metrics · CMI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{{ url_for('index') }}" class="btn">Home</a>
+    <a href="{{ url_for('exercise1') }}" class="btn">Top</a>
+    <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
+    {% if session.get('usuario') %}
+      <a href="{{ url_for('logout') }}" class="btn logout-btn">Cerrar sesión</a>
+    {% endif %}
+  </nav>
+
+  <div class="container-full extra-metrics-text">
+    <div class="section" style="margin-top:40px;">
+      <h1>More Metrics</h1>
+      <p>Here you can found two extra metrics. The average time of resolution for each incident and the number of tickets per day of the week.</p>
+
+      <form method="POST">
+        <button type="submit" class="btn">Generate Metrics</button>
+      </form>
+
+      {% if resultados %}
+        <h2>Average time of resolution by incident type</h2>
+        <ul>
+          {% for tipo, valor in resultados.avg_by_type.items() %}
+            <li>{{ tipo }}: {{ valor }} días</li>
+          {% endfor %}
+        </ul>
+
+        <h2>Tickets per day of the week</h2>
+        <ul>
+          {% for dia, conteo in resultados.tickets_by_day.items() %}
+            <li>{{ dia }}: {{ conteo }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+
+</body>
+</html>

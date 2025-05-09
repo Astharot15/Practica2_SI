@@ -1,6 +1,8 @@
 import pandas as pd
 import json
+from collections import defaultdict
 import requests
+import datetime
 
 def top_clientes(X, JSON_FILE):
     
@@ -60,6 +62,49 @@ def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
             break
 
     return nLastCVE
+
+def average_resolution_time_by_type(json_path):
+    """
+    Devuelve un dict { tipo_incidencia: media_en_días }
+    """
+    with open(json_path, encoding='utf-8') as f:
+        raw = json.load(f)
+
+    tickets = raw.get('tickets_emitidos', [])
+    tiempos = defaultdict(list)
+
+    for ticket in tickets:
+        # parseamos apertura y cierre
+        t0 = datetime.datetime.fromisoformat(ticket['fecha_apertura'])
+        t1 = datetime.datetime.fromisoformat(ticket['fecha_cierre'])
+        dias = (t1 - t0).days
+        tipos = ticket['tipo_incidencia']
+        tiempos[tipos].append(dias)
+
+    # redondeamos a 1 decimal
+    return {
+        tipo: round(sum(lista)/len(lista), 1)
+        for tipo, lista in tiempos.items() if lista
+    }
+
+
+def tickets_per_weekday(json_path):
+    """
+    Devuelve un dict { 'Monday': n, 'Tuesday': m, ... }
+    """
+    with open(json_path, encoding='utf-8') as f:
+        raw = json.load(f)
+
+    tickets = raw.get('tickets_emitidos', [])
+    conteo = defaultdict(int)
+
+    for ticket in tickets:
+        fecha = datetime.datetime.fromisoformat(ticket['fecha_apertura'])
+        dia_sem = fecha.strftime('%A')  # 'Monday', 'Tuesday', etc.
+        conteo[dia_sem] += 1
+
+    return dict(conteo)
+
 
 #print(top_clientes(10))
 #print(obtener_top_tipos_incidencias(3))

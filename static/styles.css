@@ -162,6 +162,29 @@ body.login-page {
   background-color: #7f8c8d;
 }
 
+/* Métricas extra */
+.container-full {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Letra más grande */
+.extra-metrics-text {
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.extra-metrics-text h2,
+.extra-metrics-text ul {
+  margin-bottom: 1.5rem;
+}
+
+
+
 
 
 

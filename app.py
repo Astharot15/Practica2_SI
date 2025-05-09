@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from dotenv import load_dotenv
 import os
-from utils.service import top_clientes, obtener_top_tipos_incidencias, obtener_top_empleados
+
+from utils.service import (
+    top_clientes,
+    obtener_top_tipos_incidencias,
+    obtener_top_empleados,
+    average_resolution_time_by_type,
+    tickets_per_weekday
+)
 
 app = Flask(__name__)
 
@@ -19,8 +26,6 @@ def index():
         return render_template('index.html')
 
     return redirect(url_for('login'))
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -73,6 +78,27 @@ def exercise1():
         top_employees=top_employees,
         show_employees=show_employees
     )
+
+@app.route('/extra-metrics', methods=['GET', 'POST'])
+def extra_metrics():
+    # Protegemos con login
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
+
+    resultados = None
+    if request.method == 'POST':
+        json_file = os.path.join('data', 'data_clasified.json')
+
+        # Llamamos a la lógica en service.py
+        avg_by_type    = average_resolution_time_by_type(json_file)
+        tickets_by_day = tickets_per_weekday(json_file)
+
+        resultados = {
+            'avg_by_type': avg_by_type,
+            'tickets_by_day': tickets_by_day
+        }
+
+    return render_template('extra_metrics.html', resultados=resultados)
 
 if __name__ == '__main__':
     app.run()
