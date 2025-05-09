@@ -283,6 +283,19 @@ body.login-page {
   height: 360px !important;
 }
 
+/*  extra metrics */
+.container-full {
+  max-width: 90%;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.extra-metrics-text {
+  padding-bottom: 10px;
+}
 
 
 
