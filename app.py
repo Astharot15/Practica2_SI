@@ -56,7 +56,7 @@ def exercise1():
     if request.method == 'POST':
         x = int(request.form.get('top_x', 5))  # Valor por defecto: 5
         show_employees = 'show_employees' in request.form  # Verificar si el checkbox está marcado
-        json_file = os.path.join('static', 'data', 'data_clasified.json')  # Ruta al archivo JSON
+        json_file = os.path.join('data', 'data_clasified.json')  # Ruta al archivo JSON
 
         # Obtener el top de clientes y tipos de incidencias
         top_clients = top_clientes(x, json_file)
