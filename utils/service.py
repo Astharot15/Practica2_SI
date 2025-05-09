@@ -4,6 +4,7 @@ from collections import defaultdict
 import requests
 import datetime
 
+
 def top_clientes(X, JSON_FILE):
     
     #Cargamos archivo json
@@ -16,6 +17,8 @@ def top_clientes(X, JSON_FILE):
     top_clientes = df['cliente'].value_counts().head(X).reset_index()
     top_clientes.columns = ['cliente', 'incidencias']
     return top_clientes.to_dict('records')
+
+
 
 def obtener_top_tipos_incidencias(X, JSON_FILE):
     with open(JSON_FILE, 'r') as f:
@@ -31,6 +34,8 @@ def obtener_top_tipos_incidencias(X, JSON_FILE):
     top_tipos = df.groupby('tipo_incidencia')['tiempo_resolucion'].sum().head(X).reset_index()
     return top_tipos.to_dict('records')
 
+
+
 def obtener_top_empleados(X, JSON_FILE):
     with open(JSON_FILE, 'r') as f:
         data = json.load(f)
@@ -42,6 +47,8 @@ def obtener_top_empleados(X, JSON_FILE):
     # Sumar tiempo por empleado
     top_empleados = empleados.groupby('id_emp')['tiempo'].sum().head(X).reset_index()
     return top_empleados.to_dict('records')
+
+
 
 def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
 
@@ -62,6 +69,8 @@ def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
             break
 
     return nLastCVE
+
+
 
 def average_resolution_time_by_type(json_path):
     """

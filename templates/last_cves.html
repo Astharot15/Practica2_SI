@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Last 10 CVEs</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="btn">Home</a>
+        <a href="{{ url_for('exercise1') }}" class="btn">Dashboard</a>
+        <a href="{{ url_for('last_cves') }}" class="btn">Ejercicio 3</a>
+        <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
+
+        {% if session.get('usuario') %}
+        <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
+        {% endif %}
+    </nav>
+
+    <h1>Last 10 CVEs</h1>
+    <ul>
+        {% for cve in cves %}
+            <li>{{ cve }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

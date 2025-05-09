@@ -7,7 +7,9 @@ from utils.service import (
     obtener_top_tipos_incidencias,
     obtener_top_empleados,
     average_resolution_time_by_type,
-    tickets_per_weekday
+    tickets_per_weekday,
+    get_last_CVEs
+
 )
 
 app = Flask(__name__)
@@ -98,6 +100,15 @@ def extra_metrics():
         }
 
     return render_template('extra_metrics.html', resultados=resultados)
+
+
+
+@app.route('/last-cves')
+def last_cves():
+    cves = get_last_CVEs() # Llama a la función para obtener la lista de CVEs desde la API externa
+
+    return render_template('last_cves.html', cves=cves)
+
 
 if __name__ == '__main__':
     app.run()

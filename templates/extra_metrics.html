@@ -11,7 +11,9 @@
   <nav class="navbar">
     <a href="{{ url_for('index') }}" class="btn">Home</a>
     <a href="{{ url_for('exercise1') }}" class="btn">Dashboard</a>
+    <a href="{{ url_for('last_cves') }}" class="btn">Ejercicio 3</a>
     <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
+
     {% if session.get('usuario') %}
       <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
     {% endif %}
