@@ -1,53 +1,75 @@
-import pandas as pd
-import json
-from collections import defaultdict
 import requests
-import datetime
+import os
+import sqlite3
+from flask import g
+
+DB_PATH = os.getenv('DB_PATH', 'data/tickets.db')
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES)
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+def close_db(e=None):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+
+def top_clientes(X):
+    """
+    Devuelve los X clientes con más incidencias:
+      [{ 'cliente': 123, 'incidencias': 17 }, ...]
+    """
+    db = get_db()
+    rows = db.execute("""
+      SELECT client_id   AS cliente,
+             COUNT(*)      AS incidencias
+        FROM tickets
+       GROUP BY client_id
+       ORDER BY incidencias DESC
+       LIMIT ?
+    """, (X,)).fetchall()
+    return [dict(r) for r in rows]
 
 
 
-def top_clientes(X, JSON_FILE):
-    
-    #Cargamos archivo json
-    with open(JSON_FILE, 'r') as f:
-            data = json.load(f)
-    # Crear DataFrame
-    df = pd.DataFrame(data['tickets_emitidos'])
-
-    # Contar incidencias por cliente
-    top_clientes = df['cliente'].value_counts().head(X).reset_index()
-    top_clientes.columns = ['cliente', 'incidencias']
-    return top_clientes.to_dict('records')
-
-
-
-def obtener_top_tipos_incidencias(X, JSON_FILE):
-    with open(JSON_FILE, 'r') as f:
-        data = json.load(f)
-    df = pd.DataFrame(data['tickets_emitidos'])
-
-    # Calcular tiempo de resolución
-    df['fecha_apertura'] = pd.to_datetime(df['fecha_apertura'])
-    df['fecha_cierre'] = pd.to_datetime(df['fecha_cierre'])
-    df['tiempo_resolucion'] = (df['fecha_cierre'] - df['fecha_apertura']).dt.days
-
-    # Sumar tiempo por tipo de incidencia
-    top_tipos = df.groupby('tipo_incidencia')['tiempo_resolucion'].sum().head(X).reset_index()
-    return top_tipos.to_dict('records')
+def obtener_top_tipos_incidencias(X):
+    """
+    Devuelve los X tipos de incidencia que más tiempo suman en resolución:
+      [{ 'tipo_incidencia': 5, 'tiempo_resolucion': 120 }, …]
+    """
+    db = get_db()
+    rows = db.execute("""
+        SELECT incident_type_id   AS tipo_incidencia,
+               ROUND(SUM(
+                 julianday(fecha_cierre)
+                 - julianday(fecha_apertura)
+               ), 1)              AS tiempo_resolucion
+          FROM tickets
+         GROUP BY incident_type_id
+         ORDER BY tiempo_resolucion DESC
+         LIMIT ?
+    """, (X,)).fetchall()
+    return [dict(r) for r in rows]
 
 
-
-def obtener_top_empleados(X, JSON_FILE):
-    with open(JSON_FILE, 'r') as f:
-        data = json.load(f)
-    df = pd.DataFrame(data['tickets_emitidos'])
-    
-    # Desglosar contactos con empleados
-    empleados = df.explode('contactos_con_empleados')
-    empleados = pd.json_normalize(empleados['contactos_con_empleados'])
-    # Sumar tiempo por empleado
-    top_empleados = empleados.groupby('id_emp')['tiempo'].sum().head(X).reset_index()
-    return top_empleados.to_dict('records')
+def obtener_top_empleados(X):
+    """
+    Devuelve los X empleados que más tiempo han trabajado:
+      [{ 'id_emp': 12, 'tiempo': 34.5 }, …]
+    """
+    db = get_db()
+    rows = db.execute("""
+      SELECT employee_id   AS id_emp,
+             ROUND(SUM(tiempo), 1)  AS tiempo
+        FROM contacts
+       GROUP BY employee_id
+       ORDER BY tiempo DESC
+       LIMIT ?
+    """, (X,)).fetchall()
+    return [dict(r) for r in rows]
 
 
 
@@ -89,47 +111,50 @@ def get_CVE_org(CVE_id, url_base="https://cve.circl.lu/api/cve/"):
     return org_id, org_name
 
 
-def average_resolution_time_by_type(json_path):
+
+def average_resolution_time_by_type():
     """
     Devuelve un dict { tipo_incidencia: media_en_días }
     """
-    with open(json_path, encoding='utf-8') as f:
-        raw = json.load(f)
-
-    tickets = raw.get('tickets_emitidos', [])
-    tiempos = defaultdict(list)
-
-    for ticket in tickets:
-        # parseamos apertura y cierre
-        t0 = datetime.datetime.fromisoformat(ticket['fecha_apertura'])
-        t1 = datetime.datetime.fromisoformat(ticket['fecha_cierre'])
-        dias = (t1 - t0).days
-        tipos = ticket['tipo_incidencia']
-        tiempos[tipos].append(dias)
-
-    # redondeamos a 1 decimal
-    return {
-        tipo: round(sum(lista)/len(lista), 1)
-        for tipo, lista in tiempos.items() if lista
-    }
+    db = get_db()
+    rows = db.execute("""
+        SELECT
+          incident_type_id      AS tipo_incidencia,
+          ROUND(
+            AVG(
+              julianday(fecha_cierre)
+              - julianday(fecha_apertura)
+            ), 1
+          )                    AS media_dias
+        FROM tickets
+        GROUP BY incident_type_id
+    """).fetchall()
+    return { row['tipo_incidencia']: row['media_dias'] for row in rows }
 
 
-def tickets_per_weekday(json_path):
+def tickets_per_weekday():
     """
     Devuelve un dict { 'Monday': n, 'Tuesday': m, ... }
     """
-    with open(json_path, encoding='utf-8') as f:
-        raw = json.load(f)
-
-    tickets = raw.get('tickets_emitidos', [])
-    conteo = defaultdict(int)
-
-    for ticket in tickets:
-        fecha = datetime.datetime.fromisoformat(ticket['fecha_apertura'])
-        dia_sem = fecha.strftime('%A')  # 'Monday', 'Tuesday', etc.
-        conteo[dia_sem] += 1
-
-    return dict(conteo)
+    # Mapa de número de día (0=Sunday … 6=Saturday) a nombre en inglés
+    day_names = {
+        '0': 'Sunday', '1': 'Monday', '2': 'Tuesday',
+        '3': 'Wednesday', '4': 'Thursday',
+        '5': 'Friday', '6': 'Saturday'
+    }
+    db = get_db()
+    rows = db.execute("""
+        SELECT
+          strftime('%w', fecha_apertura) AS dow,
+          COUNT(*)                      AS count
+        FROM tickets
+        GROUP BY dow
+    """).fetchall()
+    # Traducimos los códigos a nombres
+    return {
+        day_names[row['dow']]: row['count']
+        for row in rows
+    }
 
 
 #print(top_clientes(10))
