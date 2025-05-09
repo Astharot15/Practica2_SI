@@ -1,30 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CMI</title>
+    <title>Additional info from external API</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-
     <nav class="navbar">
         <a href="{{ url_for('index') }}" class="btn">Home</a>
         <a href="{{ url_for('exercise1') }}" class="btn">Dashboard</a>
         <a href="{{ url_for('last_cves') }}" class="btn">Ejercicio 3</a>
         <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
         <a href="{{ url_for('get_cve_org') }}" class="btn">Get more data from API</a>
-        {% if session.get('usuario') %}
         <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
-        {% endif %}
+
     </nav>
+    <h1>Additional info from external API</h1>
+    <form method="POST">
+        <label for="CVE_id">Enter CVE ID:</label>
+        <input type="text" id="CVE_id" name="CVE_id" required>
+        <button type="submit">Search</button>
+    </form>
 
-    <div class="centered-content">
-        <img src="{{ url_for('static', filename='images/dashboard-icon.png') }}" alt="Dashboard Icon" class="dashboard-icon">
-        <h1 class="welcome-title">Welcome to CMI Application!</h1>
-        <p class="welcome-subtitle">Use the navigation bar above to explore the dashboard</p>
+    {% if org_id and org_name %}
+    <div>
+        <h2>Vulnerability attributed to this company</h2>
+        <p><strong>Organization ID:</strong> {{ org_id }}</p>
+        <p><strong>Organization Name:</strong> {{ org_name }}</p>
     </div>
-
+    {% endif %}
 </body>
 </html>
-
-
-

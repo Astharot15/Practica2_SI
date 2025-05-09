@@ -74,7 +74,7 @@ def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
 
 
 # Es vulnerable a inyecciones pero no es el cometido de esta practica
-def get_CVE_info(CVE_id, url_base="https://cve.circl.lu/api/cve/"):
+def get_CVE_org(CVE_id, url_base="https://cve.circl.lu/api/cve/"):
 
     url = url_base + CVE_id
     response = requests.get(url)

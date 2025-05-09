@@ -2,15 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from dotenv import load_dotenv
 import os
 
-from utils.service import (
-    top_clientes,
-    obtener_top_tipos_incidencias,
-    obtener_top_empleados,
-    average_resolution_time_by_type,
-    tickets_per_weekday,
-    get_last_CVEs
-
-)
+from utils.service import *
 
 app = Flask(__name__)
 
@@ -108,6 +100,21 @@ def last_cves():
     cves = get_last_CVEs() # Llama a la función para obtener la lista de CVEs desde la API externa
 
     return render_template('last_cves.html', cves=cves)
+
+
+
+@app.route('/cve-info', methods=['GET', 'POST'])
+def get_cve_org():
+
+    org_id = org_name = None
+    if request.method == 'POST':
+        CVE_id = request.form.get('CVE_id')
+        org_id, org_name = get_CVE_org(CVE_id)  # LLamamos a la funcion para obtener la info desde la API externa
+
+
+    return render_template('cve_info.html', org_id=org_id, org_name=org_name)
+
+
 
 
 if __name__ == '__main__':
