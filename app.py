@@ -25,6 +25,8 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None  # Porque suponemos que al iniciar no hay erro
+
     if request.method == 'POST':
         usuario = request.form['usuario']
         contrasena = request.form['contrasena']
@@ -33,14 +35,9 @@ def login():
             session['usuario'] = usuario
             return redirect(url_for('index'))
         else:
-            return "Credenciales inválidas. <a href='/login'>Intentar de nuevo</a>"
-    return '''
-        <form method="post">
-            Usuario: <input type="text" name="usuario"><br>
-            Contraseña: <input type="password" name="contrasena"><br>
-            <input type="submit" value="Iniciar sesión">
-        </form>
-    '''
+            error = "Usuario o contraseña incorrectos."
+
+    return render_template('login.html', error=error)
 
 
 @app.route('/logout')

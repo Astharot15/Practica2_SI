@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar sesión · CMI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="login-page">
+
+  <div class="login-container">
+    <img src="{{ url_for('static', filename='images/locker.jpg') }}"
+         alt="Candado" class="locker-icon"/>
+
+    <h2>Accede con tu cuenta de CMI App</h2>
+
+    {% if error %}
+      <p class="error-msg">{{ error }}</p>
+    {% endif %}
+
+    <form action="{{ url_for('login') }}" method="post">
+      <div class="form-group">
+        <label for="usuario">Usuario</label>
+        <input type="text" id="usuario" name="usuario" required>
+      </div>
+      <div class="form-group">
+        <label for="contrasena">Contraseña</label>
+        <input type="password" id="contrasena" name="contrasena" required>
+      </div>
+      <button type="submit" class="btn">Iniciar sesión</button>
+    </form>
+  </div>
+
+</body>
+</html>
