@@ -4,6 +4,8 @@ from collections import defaultdict
 import requests
 import datetime
 
+from samba.dcerpc.dcerpc import response
+
 
 def top_clientes(X, JSON_FILE):
     
@@ -70,6 +72,22 @@ def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
 
     return nLastCVE
 
+
+# Es vulnerable a inyecciones pero no es el cometido de esta practica
+def get_CVE_info(CVE_id, url_base="https://cve.circl.lu/api/cve/"):
+
+    url = url_base + CVE_id
+    response = requests.get(url)
+    if response.status_code == 200:
+        cve_info = response.json()
+    else:
+        print(f"Error, Status Code: {response.status_code}")
+
+    org_id = cve_info["cveMetadata"]["assignerOrgId"]
+    org_name = cve_info["cveMetadata"]['assignerShortName']
+
+
+    return org_id, org_name
 
 
 def average_resolution_time_by_type(json_path):
