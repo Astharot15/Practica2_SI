@@ -74,24 +74,36 @@ def obtener_top_empleados(X):
 
 
 def get_last_CVEs(nCVE=10, url="https://cve.circl.lu/api/last"):
+    """
+    Llama a https://cve.circl.lu/api/last y devuelve
+    lista de nCVE IDs: ['CVE-2025-47424', 'CVE-2025-3794', …]
+    """
+    resp = requests.get(url)
+    resp.raise_for_status()
+    data = resp.json()
 
-    response = requests.get(url)
-    # Verificamos que la petición se realizó correctamente
-    if response.status_code == 200:
-        last30CVE = response.json()
-    else:
-        print(f"Error, Status Code: {response.status_code}")
+    cve_ids = []
+    for item in data:
+        # 1) Si tiene cveMetadata.cveId, lo uso
+        if 'cveMetadata' in item and 'cveId' in item['cveMetadata']:
+            cve_ids.append(item['cveMetadata']['cveId'])
+        else:
+            # 2) Si hay aliases, tomo el primero que empiece por 'CVE-'
+            if 'aliases' in item:
+                for alias in item['aliases']:
+                    if alias.startswith('CVE-'):
+                        cve_ids.append(alias)
+                        break
+            # 3) Si no, como fallback miro el campo 'id'
+            elif 'id' in item and item['id'].startswith('CVE-'):
+                cve_ids.append(item['id'])
 
-    nLastCVE = []
-
-
-    for item in last30CVE:
-        if 'cveMetadata' in item:
-            nLastCVE.append(item['cveMetadata']['cveId'])
-        if len(nLastCVE) == 10:
+        # 4) Si ya tengo suficientes, corto el bucle
+        if len(cve_ids) >= nCVE:
             break
 
-    return nLastCVE
+    return cve_ids
+
 
 
 # Es vulnerable a inyecciones pero no es el cometido de esta practica

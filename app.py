@@ -91,7 +91,7 @@ def extra_metrics():
 
 @app.route('/last-cves')
 def last_cves():
-    cves = get_last_CVEs()
+    cves = get_last_CVEs(10)
     return render_template('last_cves.html', cves=cves)
 
 @app.route('/cve-info', methods=['GET', 'POST'])
