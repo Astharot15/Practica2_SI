@@ -236,7 +236,7 @@ def logistic_regression_analysis():
     plt.savefig(vis_path)
     plt.close()
 
-    return model, accuracy, vis_path
+    return model, accuracy, 'images/logistic_regression_coefficients.png'
 
 def decision_tree_analysis():
     X_train, X_test, y_train, y_test, encoder = load_and_preprocess_data()
@@ -256,7 +256,7 @@ def decision_tree_analysis():
     plt.savefig(vis_path)
     plt.close()
 
-    return model, accuracy, vis_path
+    return model, accuracy, 'images/decision_tree.png'
 
 def random_forest_analysis():
     X_train, X_test, y_train, y_test, encoder = load_and_preprocess_data()
@@ -282,7 +282,7 @@ def random_forest_analysis():
     plt.savefig(vis_path)
     plt.close()
 
-    return model, accuracy, vis_path
+    return model, accuracy, 'images/random_forest_importance.png'
 
 def predict_ticket_criticality(model, encoder, ticket_data):
     # Preprocess new ticket
