@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMI - Predicción</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUa6dqO2HStjAUH8WZq0htnLMw7Xgk4lRO//CW2jE7P1Xat+75vvoBxF3c2X" crossorigin="anonymous">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+        <a href="{{ url_for('index') }}" class="navbar-brand">CMI</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('exercise1') }}" class="nav-link">Top</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('predict') }}" class="nav-link active">Predicción</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Predicción de Criticidad</h1>
+
+        {% if error %}
+            <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
+        <form action="{{ url_for('predict') }}" method="post" class="mx-auto" style="max-width: 600px;">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="es_mantenimiento" name="es_mantenimiento">
+                <label class="form-check-label" for="es_mantenimiento">Es incidencia de mantenimiento</label>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo_incidencia" class="form-label">Tipo de Incidencia</label>
+                <select class="form-select" id="tipo_incidencia" name="tipo_incidencia">
+                    <option value="1">Hardware</option>
+                    <option value="2">Software</option>
+                    <option value="3">Red</option>
+                    <option value="4">Otro</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="satisfaccion" class="form-label">Satisfacción del Cliente</label>
+                <input type="range" class="form-range" id="satisfaccion" name="satisfaccion" min="1" max="10" step="1" value="5">
+                <div class="form-text">Valor entre 1 (muy insatisfecho) y 10 (muy satisfecho).</div>
+            </div>
+
+            <fieldset class="mb-3">
+                <legend class="col-form-label">Método de IA</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ia_method" id="logistic" value="logistic" checked>
+                    <label class="form-check-label" for="logistic">Regresión Logística</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ia_method" id="tree" value="tree">
+                    <label class="form-check-label" for="tree">Árbol de Decisión</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ia_method" id="forest" value="forest">
+                    <label class="form-check-label" for="forest">Bosque Aleatorio</label>
+                </div>
+            </fieldset>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Predecir</button>
+            </div>
+        </form>
+
+        {% if result is defined %}
+    <div class="mt-5 text-center">
+        <h2>Resultado: <span class="badge bg-info text-dark">{{ result }}</span></h2>
+        <p>Precisión del modelo: <strong>{{ accuracy }}%</strong></p>
+        {% if visualization %}
+    <div class="mt-4">
+        <img src="{{ url_for('static', filename=visualization) }}" alt="Visualización del modelo" class="img-fluid" style="max-width: 100%; height: auto; max-height: 500px;">
+    </div>
+{% endif %}
+    </div>
+{% endif %}
+    </div>
+</body>
+</html>

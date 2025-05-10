@@ -1,6 +1,16 @@
+import json
 import requests
 import os
 import sqlite3
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import pandas as pd
 from flask import g
 
 DB_PATH = os.getenv('DB_PATH', 'data/tickets.db')
@@ -168,7 +178,128 @@ def tickets_per_weekday():
         for row in rows
     }
 
+def load_and_preprocess_data():
+    # Load data from JSON
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    json_path = os.path.join(base_dir, 'data', 'data_clasified.json')
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    tickets = data['tickets_emitidos']
 
-#print(top_clientes(10))
-#print(obtener_top_tipos_incidencias(3))
-#print(obtener_top_empleados(3))
+    # Extract features and labels
+    features = []
+    labels = []
+    for ticket in tickets:
+        feature = [
+            1 if ticket['es_mantenimiento'] else 0,
+            ticket['tipo_incidencia'],
+            ticket['satisfaccion_cliente']
+        ]
+        features.append(feature)
+        labels.append(1 if ticket['es_critico'] else 0)
+
+    # Convert to DataFrame
+    df = pd.DataFrame(features, columns=['es_mantenimiento', 'tipo_incidencia', 'satisfaccion_cliente'])
+    y = pd.Series(labels)
+
+    # One-hot encode 'tipo_incidencia'
+    encoder = OneHotEncoder(categories=[[1,2,3,4,5]], sparse_output=False)
+    tipo_incidencia_encoded = encoder.fit_transform(df[['tipo_incidencia']])
+    tipo_incidencia_df = pd.DataFrame(tipo_incidencia_encoded, columns=encoder.get_feature_names_out(['tipo_incidencia']))
+
+    # Combine encoded features
+    X = pd.concat([df[['es_mantenimiento', 'satisfaccion_cliente']], tipo_incidencia_df], axis=1)
+
+    # Split into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    return X_train, X_test, y_train, y_test, encoder
+
+def logistic_regression_analysis():
+    X_train, X_test, y_train, y_test, encoder = load_and_preprocess_data()
+    
+    # Train Logistic Regression
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Visualization: Feature coefficients
+    plt.figure(figsize=(10, 6))
+    plt.bar(X_train.columns, model.coef_[0], color='blue')
+    plt.title('Logistic Regression - Feature Coefficients')
+    plt.xlabel('Features')
+    plt.ylabel('Coefficient Value')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    vis_path = os.path.join(base_dir, 'static/images', 'logistic_regression_coefficients.png')
+    plt.savefig(vis_path)
+    plt.close()
+
+    return model, accuracy, vis_path
+
+def decision_tree_analysis():
+    X_train, X_test, y_train, y_test, encoder = load_and_preprocess_data()
+    
+    # Train Decision Tree
+    model = DecisionTreeClassifier(max_depth=5, random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Visualization: Tree structure
+    plt.figure(figsize=(20, 10))
+    plot_tree(model, feature_names=X_train.columns, class_names=['Non-Critical', 'Critical'], filled=True, rounded=True)
+    plt.title('Decision Tree - Classification Structure')
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    vis_path = os.path.join(base_dir, 'static/images', 'decision_tree.png')
+    plt.savefig(vis_path)
+    plt.close()
+
+    return model, accuracy, vis_path
+
+def random_forest_analysis():
+    X_train, X_test, y_train, y_test, encoder = load_and_preprocess_data()
+    
+    # Train Random Forest
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Visualization: Feature importance
+    plt.figure(figsize=(10, 6))
+    importances = model.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    plt.bar(range(X_train.shape[1]), importances[indices], color='green')
+    plt.title('Random Forest - Feature Importance')
+    plt.xlabel('Features')
+    plt.ylabel('Importance Score')
+    plt.xticks(range(X_train.shape[1]), [X_train.columns[i] for i in indices], rotation=45, ha='right')
+    plt.tight_layout()
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    vis_path = os.path.join(base_dir, 'static/images', 'random_forest_importance.png')
+    plt.savefig(vis_path)
+    plt.close()
+
+    return model, accuracy, vis_path
+
+def predict_ticket_criticality(model, encoder, ticket_data):
+    # Preprocess new ticket
+    feature = [
+        1 if ticket_data['es_mantenimiento'] else 0,
+        ticket_data['tipo_incidencia'],
+        ticket_data['satisfaccion_cliente']
+    ]
+    input_df = pd.DataFrame([feature], columns=['es_mantenimiento', 'tipo_incidencia', 'satisfaccion_cliente'])
+
+    # One-hot encode 'tipo_incidencia'
+    tipo_incidencia_encoded = encoder.transform(input_df[['tipo_incidencia']])
+    tipo_incidencia_df = pd.DataFrame(tipo_incidencia_encoded, columns=encoder.get_feature_names_out(['tipo_incidencia']))
+
+    # Combine encoded features
+    input_df = pd.concat([input_df[['es_mantenimiento', 'satisfaccion_cliente']], tipo_incidencia_df], axis=1)
+
+    # Predict
+    prediction = model.predict(input_df)[0]
+    return 'Critical' if prediction == 1 else 'Non-Critical'

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from dotenv import load_dotenv
+from utils.service import *
 import os
 
 from utils.service import (
@@ -12,6 +13,11 @@ from utils.service import (
     get_last_CVEs,
     get_CVE_org
 )
+
+logreg_model, logreg_acc, logreg_vis = logistic_regression_analysis()
+dt_model, dt_acc, dt_vis = decision_tree_analysis()
+rf_model, rf_acc, rf_vis = random_forest_analysis()
+_, _, _, _, encoder = load_and_preprocess_data()
 
 app = Flask(__name__)
 load_dotenv()
@@ -101,6 +107,45 @@ def cve_info():
         CVE_id = request.form.get('CVE_id')
         org_id, org_name = get_CVE_org(CVE_id)
     return render_template('cve_info.html', org_id=org_id, org_name=org_name)
+
+@app.route('/predict', methods=['GET','POST'])
+def predict():
+    # Si es GET, devolvemos el formulario iaCMI.html sin resultados
+    if request.method == 'GET':
+        return render_template('predict.html')
+
+    # Si es POST, recogemos los datos del formulario
+    es_mantenimiento = 'es_mantenimiento' in request.form
+    tipo_incidencia = int(request.form.get('tipo_incidencia', 1))
+    satisfaccion = int(request.form.get('satisfaccion', 5))
+    method = request.form.get('ia_method', 'logistic')
+
+    ticket = {
+        'es_mantenimiento': es_mantenimiento,
+        'tipo_incidencia': tipo_incidencia,
+        'satisfaccion_cliente': satisfaccion
+    }
+
+    # Selección de modelo y visualización
+    if method == 'logistic':
+        model, acc, vis = logreg_model, logreg_acc, logreg_vis
+    elif method == 'tree':
+        model, acc, vis = dt_model, dt_acc, dt_vis
+    elif method == 'forest':
+        model, acc, vis = rf_model, rf_acc, rf_vis
+    else:
+        return render_template('predict.html', error='Método no válido')
+
+    # Predecir criticidad
+    result = predict_ticket_criticality(model, encoder, ticket)
+
+    # Renderizar iaCMI.html con los resultados
+    return render_template(
+        'predict.html',
+        result=result,
+        accuracy=round(acc, 2),
+        visualization=vis
+    )
 
 if __name__ == '__main__':
     app.run()
