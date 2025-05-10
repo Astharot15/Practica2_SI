@@ -8,7 +8,7 @@
     <nav class="navbar">
         <a href="{{ url_for('index') }}" class="btn">Home</a>
         <a href="{{ url_for('exercise1') }}" class="btn">Dashboard</a>
-        <a href="{{ url_for('last_cves') }}" class="btn">Ejercicio 3</a>
+        <a href="{{ url_for('last_cves') }}" class="btn">Top10 Vulnerabilidades</a>
         <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
         <a href="{{ url_for('cve_info') }}" class="btn">Get more data from API</a>
         <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
@@ -21,7 +21,7 @@
             
             <form method="POST" class="dashboard-controls">
                 <div class="form-group">
-                    <label for="top_x">Mostrar top:</label>
+                    <label for="top_x">Show top:</label>
                     <input type="number" id="top_x" name="top_x" min="1" max="20" value="5" required>
                 </div>
                 
@@ -29,91 +29,90 @@
                     <label for="show_employees">
                         <input type="checkbox" id="show_employees" name="show_employees"
                             {% if show_employees %}checked{% endif %}>
-                        Mostrar empleados
+                        Show Employees
                     </label>
                 </div>
                 
-                <button type="submit" class="btn">Actualizar</button>
+                <button type="submit" class="btn">Reload</button>
             </form>
 
-            <!-- Gráficas -->
             {% if top_clients %}
 <div class="chart-container">
-    <div class="chart-header">
-        <h2>Top {{ top_clients|length }} Clientes</h2>
-        <div class="chart-legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--secondary-blue)"></div>
-                <span>Incidencias reportadas</span>
-            </div>
+  <div class="chart-header">
+    <h2>Top {{ top_clients|length }} Clients with more Reported Incidents</h2>
+    <!-- Legend eliminado -->
+  </div>
+
+  <div class="chart">
+    {% set max_clients = top_clients[0].incidencias %}
+    {% for client in top_clients %}
+      <div class="bar-container">
+        <div class="bar client-bar"
+             style="width: {{ (client.incidencias / max_clients * 80) + 15 }}%">
+          <span class="bar-label">{{ client.cliente }}</span>
+          <span class="bar-value">{{ client.incidencias }}</span>
         </div>
-    </div>
-    <div class="chart">
-        {% set max_clients = top_clients[0].incidencias %}
-        {% for client in top_clients %}
-        <div class="bar-container">
-            <div class="bar client-bar" 
-                style="width: {{ (client.incidencias / max_clients * 80) + 15 }}%">
-                <span class="bar-label">{{ client.cliente }}</span>
-                <span class="bar-value">{{ client.incidencias }}</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Etiquetas de ejes abajo -->
+  <div class="axis-labels">
+    <span class="axis-label left">Clients</span>
+    <span class="axis-label right">Reported Incidents</span>
+  </div>
 </div>
 {% endif %}
 
 {% if top_types %}
 <div class="chart-container">
-    <div class="chart-header">
-        <h2>Top {{ top_types|length }} Tipos de Incidencia</h2>
-        <div class="chart-legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--accent-red)"></div>
-                <span>Días de resolución</span>
-            </div>
+  <div class="chart-header">
+    <h2>Top {{ top_types|length }} Types of Incidets with more time Solving</h2>
+    <!-- legend eliminado -->
+  </div>
+  <div class="chart">
+    {% set max_incidents = top_types[0].tiempo_resolucion %}
+    {% for incident in top_types %}
+      <div class="bar-container">
+        <div class="bar incident-bar"
+             style="width: {{ (incident.tiempo_resolucion / max_incidents * 80) + 15 }}%">
+          <span class="bar-label">{{ incident.tipo_incidencia }}</span>
+          <span class="bar-value">{{ incident.tiempo_resolucion|round|int }} days</span>
         </div>
-    </div>
-    <div class="chart">
-        {% set max_incidents = top_types[0].tiempo_resolucion %}
-        {% for incident in top_types %}
-        <div class="bar-container">
-            <div class="bar incident-bar" 
-                style="width: {{ (incident.tiempo_resolucion / max_incidents * 80) + 15 }}%">
-                <span class="bar-label">{{ incident.tipo_incidencia }}</span>
-                <span class="bar-value">{{ incident.tiempo_resolucion|round|int }} días</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="axis-labels">
+    <span class="axis-label left">Type of Incident</span>
+    <span class="axis-label right">Days of Resolution</span>
+  </div>
 </div>
 {% endif %}
 
 {% if show_employees and top_employees %}
 <div class="chart-container">
-    <div class="chart-header">
-        <h2>Top {{ top_employees|length }} Empleados</h2>
-        <div class="chart-legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--accent-green)"></div>
-                <span>Horas trabajadas</span>
-            </div>
+  <div class="chart-header">
+    <h2>Top {{ top_employees|length }} Employees that spent more time solving incidents</h2>
+  </div>
+  <div class="chart">
+    {% set max_employees = top_employees[0].tiempo %}
+    {% for emp in top_employees %}
+      <div class="bar-container">
+        <div class="bar employee-bar"
+             style="width: {{ (emp.tiempo / max_employees * 80) + 15 }}%">
+          <span class="bar-label">Employee #{{ emp.id_emp }}</span>
+          <span class="bar-value">{{ emp.tiempo|round|int }} hours</span>
         </div>
-    </div>
-    <div class="chart">
-        {% set max_employees = top_employees[0].tiempo %}
-        {% for emp in top_employees %}
-        <div class="bar-container">
-            <div class="bar employee-bar" 
-                style="width: {{ (emp.tiempo / max_employees * 80) + 15 }}%">
-                <span class="bar-label">Empleado #{{ emp.id_emp }}</span>
-                <span class="bar-value">{{ emp.tiempo|round|int }} horas</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="axis-labels">
+    <span class="axis-label left">Employees</span>
+    <span class="axis-label right">Hours Solving</span>
+  </div>
 </div>
 {% endif %}
+
 
         </div>
     </div>

@@ -297,5 +297,49 @@ body.login-page {
   padding-bottom: 10px;
 }
 
+/* Contenedor que alinea eje Y + barras */
+.chart-with-axes {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Etiqueta vertical para eje Y */
+.y-axis-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-right: 0.5rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Etiqueta horizontal para eje X */
+.x-axis-label {
+  text-align: right;
+  padding-right: 1.5rem;
+  margin-top: 0.5rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Contenedor para las etiquetas de ejes */
+.axis-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1.5rem;    /* coincide con el padding de .chart */
+  margin-top: 0.5rem;
+}
+
+/* Estilo común de las etiquetas */
+.axis-label {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.axis-label.left  { text-align: left;  }
+.axis-label.right { text-align: right; }
+
+
+
+
 
 
