@@ -10,7 +10,8 @@ from utils.service import (
     average_resolution_time_by_type,
     tickets_per_weekday,
     get_last_CVEs,
-    get_CVE_org
+    get_CVE_org,
+    get_login
 )
 
 app = Flask(__name__)
@@ -28,13 +29,14 @@ def index():
         return render_template('index.html')
     return redirect(url_for('login'))
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
         usuario = request.form['usuario']
         contrasena = request.form['contrasena']
-        if usuario == USER and contrasena == PASS:
+        if get_login(usuario, contrasena):
             session['usuario'] = usuario
             return redirect(url_for('index'))
         else:

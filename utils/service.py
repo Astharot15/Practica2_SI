@@ -11,10 +11,25 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
+
 def close_db(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+
+def get_login(user, password):
+
+    db = get_db()
+    query = """
+        SELECT 1
+        FROM clients_login
+        WHERE user = ? AND password = ?
+        LIMIT 1
+    """
+    result = db.execute(query, (user, password)).fetchone()
+
+    return result is not None
 
 
 def top_clientes(X):

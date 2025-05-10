@@ -45,8 +45,12 @@ CREATE TABLE IF NOT EXISTS contacts (
     FOREIGN KEY(ticket_id)   REFERENCES tickets(id),
     FOREIGN KEY(employee_id) REFERENCES employees(id)
 );
-"""
 
+CREATE TABLE IF NOT EXISTS clients_login (
+    user TEXT PRIMARY KEY,
+    password TEXT NOT NULL
+);
+"""
 
 def main():
     # 1) Arranca y crea tablas
@@ -56,11 +60,21 @@ def main():
     cur = conn.cursor()
     cur.executescript(SCHEMA)
 
-    # 2) Lee JSON
+    # 2) Inserta registros de prueba en clients_login
+    test_users = [
+        ('user1', 'password1'),
+        ('user2', 'password2'),
+        ('user3', 'password3'),
+        ('user4', 'password4'),
+        ('user5', 'password5')
+    ]
+    cur.executemany("INSERT INTO clients_login(user, password) VALUES(?, ?)", test_users)
+
+    # 3) Lee JSON
     with open(JSON_PATH, 'r', encoding='utf-8') as f:
         data = json.load(f)['tickets_emitidos']
 
-    # 3) Inserta únicos en clients, incident_types y employees
+    # 4) Inserta únicos en clients, incident_types y employees
     clients = set()
     types = set()
     emps = set()
@@ -74,7 +88,7 @@ def main():
     cur.executemany("INSERT INTO incident_types(id) VALUES(?)", [(i,) for i in types])
     cur.executemany("INSERT INTO employees(id) VALUES(?)", [(e,) for e in emps])
 
-    # 4) Inserta tickets y contactos
+    # 5) Inserta tickets y contactos
     for t in data:
         cur.execute(
             """INSERT INTO tickets
