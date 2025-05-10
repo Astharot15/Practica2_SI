@@ -338,6 +338,16 @@ body.login-page {
 .axis-label.left  { text-align: left;  }
 .axis-label.right { text-align: right; }
 
+.cve-list {
+  margin: 1rem 0 0 2rem;   /* margen superior y sangría */
+  padding: 0;
+  list-style-type: disc;   /* viñetas */
+}
+
+.cve-list li {
+  margin-bottom: 0.5rem;   /* separación entre ítems */
+}
+
 
 
 
