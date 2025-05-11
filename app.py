@@ -116,13 +116,13 @@ def predict():
 
     # Si es POST, recogemos los datos del formulario
     es_mantenimiento = 'es_mantenimiento' in request.form
-    tipo_incidencia = int(request.form.get('tipo_incidencia', 1))
+    incident_type_id = int(request.form.get('incident_type_id', 1))
     satisfaccion = int(request.form.get('satisfaccion', 5))
     method = request.form.get('ia_method', 'logistic')
 
     ticket = {
         'es_mantenimiento': es_mantenimiento,
-        'tipo_incidencia': tipo_incidencia,
+        'incident_type_id': incident_type_id,
         'satisfaccion_cliente': satisfaccion
     }
 

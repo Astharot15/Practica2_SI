@@ -179,38 +179,50 @@ def tickets_per_weekday():
     }
 
 def load_and_preprocess_data():
-    # Load data from JSON
+    """
+    Carga los datos desde la base de datos tickets.db y los prepara para modelos ML.
+    Usa las columnas: es_mantenimiento, incident_type_id, satisfaccion, es_critico.
+    """
     base_dir = os.path.dirname(os.path.dirname(__file__))
-    json_path = os.path.join(base_dir, 'data', 'data_clasified.json')
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-    tickets = data['tickets_emitidos']
+    db_path = os.path.join(base_dir, 'data', 'tickets.db')
+    conn = sqlite3.connect(db_path)
+    query = """
+        SELECT
+            es_mantenimiento,
+            incident_type_id,
+            satisfaccion,
+            es_critico
+        FROM tickets
+    """
+    df = pd.read_sql_query(query, conn)
+    conn.close()
 
-    # Extract features and labels
+    # Extraer características y etiquetas
     features = []
     labels = []
-    for ticket in tickets:
+    for _, row in df.iterrows():
         feature = [
-            1 if ticket['es_mantenimiento'] else 0,
-            ticket['tipo_incidencia'],
-            ticket['satisfaccion_cliente']
+            int(row['es_mantenimiento']),
+            int(row['incident_type_id']),
+            int(row['satisfaccion'])
         ]
         features.append(feature)
-        labels.append(1 if ticket['es_critico'] else 0)
+        labels.append(int(row['es_critico']))
 
-    # Convert to DataFrame
-    df = pd.DataFrame(features, columns=['es_mantenimiento', 'tipo_incidencia', 'satisfaccion_cliente'])
+    # Convertir a DataFrame
+    df_features = pd.DataFrame(features, columns=['es_mantenimiento', 'incident_type_id', 'satisfaccion_cliente'])
     y = pd.Series(labels)
 
-    # One-hot encode 'tipo_incidencia'
-    encoder = OneHotEncoder(categories=[[1,2,3,4,5]], sparse_output=False)
-    tipo_incidencia_encoded = encoder.fit_transform(df[['tipo_incidencia']])
-    tipo_incidencia_df = pd.DataFrame(tipo_incidencia_encoded, columns=encoder.get_feature_names_out(['tipo_incidencia']))
+    # One-hot encode 'incident_type_id'
+    incident_types = sorted(df_features['incident_type_id'].unique())
+    encoder = OneHotEncoder(categories=[incident_types], sparse_output=False)
+    incident_type_encoded = encoder.fit_transform(df_features[['incident_type_id']])
+    incident_type_df = pd.DataFrame(incident_type_encoded, columns=encoder.get_feature_names_out(['incident_type_id']))
 
-    # Combine encoded features
-    X = pd.concat([df[['es_mantenimiento', 'satisfaccion_cliente']], tipo_incidencia_df], axis=1)
+    # Combinar características codificadas
+    X = pd.concat([df_features[['es_mantenimiento', 'satisfaccion_cliente']], incident_type_df], axis=1)
 
-    # Split into training and testing sets
+    # Dividir en conjuntos de entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     return X_train, X_test, y_train, y_test, encoder
 
@@ -288,17 +300,17 @@ def predict_ticket_criticality(model, encoder, ticket_data):
     # Preprocess new ticket
     feature = [
         1 if ticket_data['es_mantenimiento'] else 0,
-        ticket_data['tipo_incidencia'],
+        ticket_data['incident_type_id'],
         ticket_data['satisfaccion_cliente']
     ]
-    input_df = pd.DataFrame([feature], columns=['es_mantenimiento', 'tipo_incidencia', 'satisfaccion_cliente'])
+    input_df = pd.DataFrame([feature], columns=['es_mantenimiento', 'incident_type_id', 'satisfaccion_cliente'])
 
-    # One-hot encode 'tipo_incidencia'
-    tipo_incidencia_encoded = encoder.transform(input_df[['tipo_incidencia']])
-    tipo_incidencia_df = pd.DataFrame(tipo_incidencia_encoded, columns=encoder.get_feature_names_out(['tipo_incidencia']))
+    # One-hot encode 'incident_type_id'
+    incident_type_encoded = encoder.transform(input_df[['incident_type_id']])
+    incident_type_df = pd.DataFrame(incident_type_encoded, columns=encoder.get_feature_names_out(['incident_type_id']))
 
     # Combine encoded features
-    input_df = pd.concat([input_df[['es_mantenimiento', 'satisfaccion_cliente']], tipo_incidencia_df], axis=1)
+    input_df = pd.concat([input_df[['es_mantenimiento', 'satisfaccion_cliente']], incident_type_df], axis=1)
 
     # Predict
     prediction = model.predict(input_df)[0]
