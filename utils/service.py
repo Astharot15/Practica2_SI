@@ -144,8 +144,7 @@ def average_resolution_time_by_type():
           incident_type_id      AS tipo_incidencia,
           ROUND(
             AVG(
-              julianday(fecha_cierre)
-              - julianday(fecha_apertura)
+              julianday(fecha_cierre) - julianday(fecha_apertura)
             ), 1
           )                    AS media_dias
         FROM tickets
