@@ -146,7 +146,7 @@ def average_resolution_time_by_type():
             AVG(
               julianday(fecha_cierre) - julianday(fecha_apertura)
             ), 1
-          )                    AS media_dias
+          ) AS media_dias
         FROM tickets
         GROUP BY incident_type_id
     """).fetchall()
@@ -157,17 +157,16 @@ def tickets_per_weekday():
     """
     Devuelve un dict { 'Monday': n, 'Tuesday': m, ... }
     """
-    # Mapa de número de día (0=Sunday … 6=Saturday) a nombre en inglés
     day_names = {
-        '0': 'Sunday', '1': 'Monday', '2': 'Tuesday',
-        '3': 'Wednesday', '4': 'Thursday',
-        '5': 'Friday', '6': 'Saturday'
+        '0': 'Monday', '1': 'Tuesday',
+        '2': 'Wednesday', '3': 'Thursday',
+        '4': 'Friday', '5': 'Saturday', '6':'Sunday'
     }
     db = get_db()
     rows = db.execute("""
         SELECT
           strftime('%w', fecha_apertura) AS dow,
-          COUNT(*)                      AS count
+          COUNT(*) AS count
         FROM tickets
         GROUP BY dow
     """).fetchall()
