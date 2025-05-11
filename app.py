@@ -86,7 +86,6 @@ def extra_metrics():
 
     resultados = None
     if request.method == 'POST':
-        # Ahora tiramos de BD, no de JSON
         avg_by_type    = average_resolution_time_by_type()
         tickets_by_day = tickets_per_weekday()
 

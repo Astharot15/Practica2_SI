@@ -11,7 +11,11 @@
         <a href="{{ url_for('last_cves') }}" class="btn">Top10 Vulnerabilidades</a>
         <a href="{{ url_for('extra_metrics') }}" class="btn">More Metrics</a>
         <a href="{{ url_for('cve_info') }}" class="btn">Get more data from API</a>
+        <a href="{{ url_for('predict') }}" class="btn">Predict</a>
+
+        {% if session.get('usuario') %}
         <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
+        {% endif %}
 
     </nav>
 

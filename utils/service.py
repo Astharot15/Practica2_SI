@@ -170,7 +170,6 @@ def tickets_per_weekday():
         FROM tickets
         GROUP BY dow
     """).fetchall()
-    # Traducimos los códigos a nombres
     return {
         day_names[row['dow']]: row['count']
         for row in rows
