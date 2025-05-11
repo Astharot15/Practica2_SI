@@ -54,6 +54,8 @@ def logout():
 
 @app.route('/exercise1', methods=['GET', 'POST'])
 def exercise1():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
     top_clients = []
     top_types   = []
     top_employees = []
@@ -97,11 +99,15 @@ def extra_metrics():
 
 @app.route('/last-cves')
 def last_cves():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
     cves = get_last_CVEs(10)
     return render_template('last_cves.html', cves=cves)
 
 @app.route('/cve-info', methods=['GET', 'POST'])
 def cve_info():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
     org_id = org_name = None
     if request.method == 'POST':
         CVE_id = request.form.get('CVE_id')
@@ -110,6 +116,8 @@ def cve_info():
 
 @app.route('/predict', methods=['GET','POST'])
 def predict():
+    if 'usuario' not in session:
+        return redirect(url_for('login'))
     # Si es GET, devolvemos el formulario iaCMI.html sin resultados
     if request.method == 'GET':
         return render_template('predict.html')
